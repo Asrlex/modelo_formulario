@@ -21,6 +21,7 @@ from excel import Excel
 import tk_utils
 import configparser
 import os
+import re
 
 
 ################################################################################
@@ -49,7 +50,7 @@ def submit():
         return
 
     # If any of the entry fields or comboboxes are empty, show an error message
-    if not fecha_entrada.get() or not observaciones.get('1.0', tk.END) or \
+    if not fecha_entrada.get() or not observaciones.get('1.0', "end-1c") or \
             not identificador.get() or not importe.get() or estados_cb.get() == "--" or \
             (estados_cb.get() == "INCIDENCIA" and \
                 (not fecha_resolucion.get() or not operador_resolucion.get() \
@@ -77,9 +78,8 @@ def submit():
         int(num_llamadas.get()) if num_llamadas.get() else 0,
         fecha_resolucion.get(),
         operador_resolucion.get(),
-        observaciones.get('1.0', tk.END),
+        observaciones.get('1.0', "end-1c"),
     ]
-    print(values)
 
     # Insert the record in the database
     database.insert_registro(values)
@@ -98,7 +98,7 @@ def clear():
     campo.set("")
     fecha_resolucion.set("")
     operador_resolucion.set("")
-    observaciones.delete('1.0', tk.END)
+    observaciones.delete('1.0', "end-1c")
     num_llamadas.set("")
 
 # Create a function that disables or enables every field in the incidencias category
@@ -121,7 +121,7 @@ def estado_seleccionado(event):
         toggle_use_incidencias("disabled")
 
 # Create a function that validates an entry field and accepts only numbers and dots
-def only_numbers(char):
+def verificar_numerico(char):
     return char.isdigit() or char == "" or char == "."
 
 # Create a function that shows an auxiliary window to choose whether to extract \
@@ -217,17 +217,69 @@ def exportar(selector, fechas="", window=None):
     # Show a message to the user
     messagebox.showinfo("Información", "El archivo se ha exportado correctamente")
 
+# Create a function that verifies the Excel file headers
+def verificar_cabeceras(headers):
+    # Check if the headers are correct
+    if headers != cabeceras[1:]:
+        # Show a message to the user
+        messagebox.showerror("Error", "El archivo no tiene los campos correctos")
+        return False
+    return True
+
+# Create a function that verifies the integrity of the data
+def verificar_datos(datos):
+    date_regex = r"^\d{2}-\d{2}-\d{4}$"
+    for registro in datos:
+        # Check if fecha entrada has a valid date format
+        if not re.match(date_regex, registro[0]):
+            messagebox.showerror("Error", "Fecha de entrada incorrecta")
+            return False
+        # Check if the next 2 fields are empty
+        if registro[1] != "" or registro[2] != "":
+            messagebox.showerror("Error", "El registro tiene campos vacíos")
+            return False
+        # Check if importe is a valid number
+        try:
+            float(registro[3])
+        except ValueError:
+            messagebox.showerror("Error", "Importe incorrecto")
+            return False
+        # If estado is INCIDENCIA, check whether the next fields are valid
+        if registro[4] == "INCIDENCIA":
+            # Check if registro[5][8][9] are empty
+            if registro[5] != "" or registro[8] != "" or registro[9] != "":
+                messagebox.showerror("Error", "El registro tiene campos vacíos")
+                return False
+            # Check if registro[6] is a valid integer
+            try:
+                int(registro[6])
+            except ValueError:
+                messagebox.showerror("Error", "Número de llamadas incorrecto")
+                return False
+            # Check if registro[7] is a valid date
+            if not re.match(date_regex, registro[7]):
+                messagebox.showerror("Error", "Fecha de resolución incorrecta")
+                return False
+    return True
+
 # Create a function that imports data from an Excel file to the database
 def importar():
     # Create a new Excel file
     excel = Excel()
     excel.cargar_archivo()
 
-    # Read the data from the Excel file
-    data = excel.leerHoja()
+    # Check format integrity and insert the data in the database
+    if not verificar_cabeceras(excel.datos[0]):
+        messagebox.showerror("Error", "El archivo no tiene el formato correcto")
+        return
+    elif not verificar_datos(excel.datos[1:]):
+        return
+    else:
+        # Delete the headers from the data
+        del excel.datos[0]
 
-    # Insert the data in the database
-    database.insert_multiples_registros(data)
+        # Insert the data in the database
+        database.insert_multiples_registros(excel.datos)
 
     # Show a message to the user
     messagebox.showinfo("Información", "El archivo se ha importado correctamente")
@@ -422,7 +474,7 @@ ttk.Button(marco_id, image=search_img, command=buscar_id, width=5, padding=(0))\
     .grid(column=1, row=0, sticky=tk.W)
 
 # Add a number field which validates character entry
-val = marco_formulario.register(only_numbers)
+val = marco_formulario.register(verificar_numerico)
 ttk.Label(marco_formulario, text="Importe:")\
     .grid(column=4, row=row_form, sticky=tk.E)
 ttk.Entry(marco_formulario, textvariable=importe, font=("Gotham Light", 10), width=22,

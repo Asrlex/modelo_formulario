@@ -107,7 +107,7 @@ class Excel:
                     bottom = Side(style='thin'))
                 celda.font = Font(name='Gotham Light', size=10)
         for columna in self.columnas:
-            self.hoja.column_dimensions[columna[0].column_letter].width = 25
+            self.hoja.column_dimensions[columna[0].column_letter].width = 20
     
     def formato_cabecera(self):
         """ Formatea la cabecera """
