@@ -1,6 +1,9 @@
 '''Database class to manage the database
 
-This class is used to manage the database. It contains methods to create the tables, insert, read, edit and delete data.
+Author: Alejandro Sanchez Rodriguez
+Description: This class is used to manage the database. It contains methods to 
+    create the tables, insert, read, edit and delete data.
+Date: 2023-06-30
 '''
 
 import sqlite3

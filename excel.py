@@ -1,6 +1,8 @@
 '''Excel-handling file
 
-This file contains the Excel class, which is used to handle excel files.
+Author: Alejandro Sanchez Rodriguez
+Description: This file contains the Excel class, which is used to handle excel files.
+Date: 2023-06-30
 '''
 
 from openpyxl import Workbook

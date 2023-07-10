@@ -1,3 +1,7 @@
 /venv
 __pycache__/
 *.xlsx
+*.7z
+*.zip
+*.gz
+*.tar.gz

@@ -356,220 +356,225 @@ cabeceras = ["ID", "Fecha entrada", "Operador", "Identificador",
 
 
 ################################################################################
-# Create GUI window
-ventana_principal = tk.Tk()
-ventana_principal.title("Nombre del servicio")
-ventana_principal.resizable(False, False)
-ventana_principal.iconbitmap("imgs/favicon.ico")
-ventana_principal.configure(background="#FFFFFF")
 
-# Add a style
-STYLE_THEME = config["STYLES"]["THEME"]
-style = ttk.Style(ventana_principal)
-style.configure("TFrame", background="#FFFFFF")
-style.configure("TLabel", font=("Gotham", 12), padding=(15, 5, 5, 5), 
-    foreground="#00558C", background="#FFFFFF")
-style.configure("TButton", font=("Gotham", 12), padding=(5, 5, 5, 5),
-    width=16, cursor="hand2", justify=tk.CENTER, background="#FFFFFF")
-style.configure("TEntry", font=("Gotham Light", 12), width=22)
-# SVF Colour #00558C
-# SVF Colour lighter #376887
+def main():
+    # Create GUI window
+    ventana_principal = tk.Tk()
+    ventana_principal.title("Nombre del servicio")
+    ventana_principal.resizable(False, False)
+    ventana_principal.iconbitmap("imgs/favicon.ico")
+    ventana_principal.configure(background="#FFFFFF")
 
-################################################################################
-# Add a menu
-menu = tk.Menu(ventana_principal)
-ventana_principal.config(menu=menu)
-# Add a file menu with commands to load and extract excel files
-file_menu = tk.Menu(menu, tearoff=False)
-menu.add_cascade(label="Archivo", menu=file_menu)
-file_menu.add_command(label="Exportar informe", command=exportar_aux)
-file_menu.add_command(label="Importar datos", command=importar)
-file_menu.add_command(label="Salir", command=ventana_principal.quit)
-# Add a help menu
-help_menu = tk.Menu(menu, tearoff=False)
-menu.add_cascade(label="Ayuda", menu=help_menu)
-help_menu.add_command(label="Ayuda", command=help)
-help_menu.add_command(label="Acerca de...", command=about)
+    # Add a style
+    STYLE_THEME = config["STYLES"]["THEME"]
+    style = ttk.Style(ventana_principal)
+    style.configure("TFrame", background="#FFFFFF")
+    style.configure("TLabel", font=("Gotham", 12), padding=(15, 5, 5, 5), 
+        foreground="#00558C", background="#FFFFFF")
+    style.configure("TButton", font=("Gotham", 12), padding=(5, 5, 5, 5),
+        width=16, cursor="hand2", justify=tk.CENTER, background="#FFFFFF")
+    style.configure("TEntry", font=("Gotham Light", 12), width=22)
+    # SVF Colour #00558C
+    # SVF Colour lighter #376887
 
-
-################################################################################
-# Add a label
-marco_titulo = ttk.Frame(ventana_principal, style="TFrame")
-logo_img = ImageTk.PhotoImage(Image.open("./imgs/logo.JPG").resize((80, 100)))
-logo_label = ttk.Label(
-    marco_titulo,
-    image=logo_img,
-    background="#FFFFFF",
-)
-logo_label.grid(column=0, row=0, sticky=tk.E)
-titulo = ttk.Label(
-    marco_titulo, 
-    text="Nombre del servicio",
-    font=("Gotham", 30),
-    padding=(20, 20),
-    justify=tk.CENTER,
-    anchor=tk.CENTER,
-    width=20
-)
-titulo.grid(column=1, row=0, columnspan=4, sticky=tk.W)
-marco_titulo.grid(column=0, row=0, columnspan=4)
+    ################################################################################
+    # Add a menu
+    menu = tk.Menu(ventana_principal)
+    ventana_principal.config(menu=menu)
+    # Add a file menu with commands to load and extract excel files
+    file_menu = tk.Menu(menu, tearoff=False)
+    menu.add_cascade(label="Archivo", menu=file_menu)
+    file_menu.add_command(label="Exportar informe", command=exportar_aux)
+    file_menu.add_command(label="Importar datos", command=importar)
+    file_menu.add_command(label="Salir", command=ventana_principal.quit)
+    # Add a help menu
+    help_menu = tk.Menu(menu, tearoff=False)
+    menu.add_cascade(label="Ayuda", menu=help_menu)
+    help_menu.add_command(label="Ayuda", command=help)
+    help_menu.add_command(label="Acerca de...", command=about)
 
 
-################################################################################
-# Create a frame for the comboboxes
-factores_principales = ttk.Frame(ventana_principal, style="TFrame", relief=tk.RAISED, borderwidth=2)
-factores_principales.grid(column=0, row=1, columnspan=4, pady=(10, 10), padx=(10, 10))
-
-# Add a combobox from which to select the user
-ttk.Label(factores_principales, text="Operador:", font=("Gotham", 14))\
-    .grid(column=0, row=0, sticky=tk.E, pady=(5, 15), padx=(15, 0))
-operador = tk.StringVar()
-operador_cb = ttk.Combobox(factores_principales, textvariable=operador, state="readonly",\
-                            font=("Gotham", 12), width=25, justify=tk.CENTER)
-operador_cb["values"] = [(f"{u[1]} - {u[2]}") for u in usuarios]
-operador_cb.grid(column=1, row=0, columnspan=2, pady=(5, 15), padx=(15, 15))
-
-
-################################################################################
-# Add a frame for the entry fields
-marco_formulario = ttk.Frame(ventana_principal, style="TFrame")
-marco_formulario.grid(column=0, row=2, columnspan=4, pady=(10, 10), padx=(20))
-
-# Add entry fields
-fecha_entrada = tk.StringVar()
-identificador = tk.StringVar()
-importe = tk.DoubleVar()
-campo = tk.StringVar()
-num_llamadas = tk.StringVar()
-fecha_resolucion = tk.StringVar()
-operador_resolucion = tk.StringVar()
-observaciones = tk.StringVar()
-
-# Dynamically advance the row counter to structure the form
-row_form = 0
-
-################################################################################
-# Add a separator to define a section
-ttk.Separator(marco_formulario,orient='horizontal')\
-    .grid(column=0, row=row_form, columnspan=8, sticky='ew', pady=5)
-row_form += 1
-
-# Add a date entry field
-ttk.Label(marco_formulario, text="Fecha de\nentrada:")\
-    .grid(column=0, row=row_form, sticky=tk.E)
-cal_entrada = DateEntry(marco_formulario, textvariable=fecha_entrada, font=("Gotham Light", 10),
-    justify=tk.CENTER, width=20, locale="es_ES", date_pattern="dd-MM-yyyy")
-cal_entrada.grid(column=1, row=row_form)
-
-# Add a field for the global identifier of the register, and a button to search for it on the database
-ttk.Label(marco_formulario, text="ID:")\
-    .grid(column=2, row=row_form, sticky=tk.E)
-marco_id = ttk.Frame(marco_formulario, style="TFrame")
-marco_id.grid(column=3, row=row_form, columnspan=1, sticky=tk.W)
-
-ttk.Entry(marco_id, textvariable=identificador, font=("Gotham Light", 10), width=19)\
-    .grid(column=0, row=0)
-search_img = PhotoImage(file=r".\imgs\search.png")
-ttk.Button(marco_id, image=search_img, command=buscar_id, width=5, padding=(0))\
-    .grid(column=1, row=0, sticky=tk.W)
-
-# Add a number field which validates character entry
-val = marco_formulario.register(verificar_numerico)
-ttk.Label(marco_formulario, text="Importe:")\
-    .grid(column=4, row=row_form, sticky=tk.E)
-ttk.Entry(marco_formulario, textvariable=importe, font=("Gotham Light", 10), width=22,
-        validate="key", validatecommand=(val, "%S"))\
-    .grid(column=5, row=row_form)
-
-# Add a combobox from a given collection with a bound method that updates multiple widgets
-ttk.Label(marco_formulario, text="Estado:")\
-    .grid(column=6, row=row_form, sticky=tk.E)
-estados_cb = ttk.Combobox(marco_formulario, state="readonly",
-    font=("Gotham Light", 10), width=20)
-estados_cb['values'] = ["--", "OK", "INCIDENCIA", "KO"]
-estados_cb.current(0)
-estados_cb.grid(column=7, row=row_form)
-estados_cb.bind("<<ComboboxSelected>>", estado_seleccionado)
-
-row_form += 1
-
-################################################################################
-# Add a separator
-ttk.Separator(marco_formulario,orient='horizontal')\
-    .grid(column=0, row=row_form, columnspan=8, sticky='ew', pady=5)
-row_form += 1
-
-# Section with explicitly defined variables for them to be disabled or enabled
-campo_label = ttk.Label(marco_formulario, text="Campo:", state="disabled")
-campo_label.grid(column=0, row=row_form, sticky=tk.E)
-campo_entry = ttk.Entry(marco_formulario, textvariable=campo, font=("Gotham Light", 10),
-    width=22, state="disabled")
-campo_entry.grid(column=1, row=row_form)
-
-num_label = ttk.Label(marco_formulario, text="Nº llamadas:", state="disabled")
-num_label.grid(column=2, row=row_form, sticky=tk.E)
-num_llamadas.set(0)
-num_entry = ttk.Entry(marco_formulario, textvariable=num_llamadas, font=("Gotham Light", 10),
-    width=22, state="disabled")
-num_entry.grid(column=3, row=row_form)
-
-fres_label = ttk.Label(marco_formulario, text="Fecha\nresolución:", state="disabled")
-fres_label.grid(column=4, row=row_form, sticky=tk.E)
-cal_resolucion = DateEntry(marco_formulario, textvariable=fecha_resolucion,
-    font=("Gotham Light", 10), state="disabled", 
-    justify=tk.CENTER, width=20, locale='es_ES', date_pattern="dd-MM-yyyy")
-cal_resolucion.grid(column=5, row=row_form)
-
-opres_label = ttk.Label(marco_formulario, text="Operador\nresolución:", state="disabled")
-opres_label.grid(column=6, row=row_form, sticky=tk.E)
-oper_res_cb = ttk.Combobox(marco_formulario, textvariable=operador_resolucion,
-    state="disabled", font=("Gotham Light", 10), width=20)
-oper_res_cb['values'] = [u[1] for u in usuarios]
-oper_res_cb.grid(column=7, row=row_form)
-
-row_form += 1
-
-################################################################################
-# Add a separator
-ttk.Separator(marco_formulario,orient='horizontal')\
-    .grid(column=0, row=row_form, columnspan=8, sticky='ew', pady=5)
-row_form += 1
-
-# Add a text field form comments
-ttk.Label(marco_formulario, text="Observaciones:")\
-    .grid(column=2, row=row_form, sticky=tk.E)
-observaciones = tk.Text(marco_formulario, font=("Gotham Light", 10), width=50, 
-        height=3, background="#F0F0F0", relief="sunken", wrap=tk.WORD)
-observaciones.grid(column=3, row=row_form, columnspan=4, sticky=tk.W+tk.E+tk.N+tk.S)
-
-row_form += 1
-
-################################################################################
-# Add a separator
-ttk.Separator(marco_formulario,orient='horizontal')\
-    .grid(column=0, row=row_form, columnspan=8, sticky='ew', pady=5)
-row_form += 1
-
-# Resize the grid columns and rows
-tk_utils.redimensionar_filas_columnas(marco_formulario)
+    ################################################################################
+    # Add a label
+    marco_titulo = ttk.Frame(ventana_principal, style="TFrame")
+    logo_img = ImageTk.PhotoImage(Image.open("./imgs/logo.JPG").resize((80, 100)))
+    logo_label = ttk.Label(
+        marco_titulo,
+        image=logo_img,
+        background="#FFFFFF",
+    )
+    logo_label.grid(column=0, row=0, sticky=tk.E)
+    titulo = ttk.Label(
+        marco_titulo, 
+        text="Nombre del servicio",
+        font=("Gotham", 30),
+        padding=(20, 20),
+        justify=tk.CENTER,
+        anchor=tk.CENTER,
+        width=20
+    )
+    titulo.grid(column=1, row=0, columnspan=4, sticky=tk.W)
+    marco_titulo.grid(column=0, row=0, columnspan=4)
 
 
-################################################################################
-# Add a button to submit the form and a button to clear the form
-botones = ttk.Frame(ventana_principal, style="TFrame")
-botones.grid(column=0, row=3, columnspan=4, pady=(10, 10), padx=(10, 10))
+    ################################################################################
+    # Create a frame for the comboboxes
+    factores_principales = ttk.Frame(ventana_principal, style="TFrame", relief=tk.RAISED, borderwidth=2)
+    factores_principales.grid(column=0, row=1, columnspan=4, pady=(10, 10), padx=(10, 10))
 
-confirmar = ttk.Button(botones, text="Confirmar", command=submit)\
-    .grid(column=1, row=0, pady=(10, 20), padx=(0, 15))
-limpiar = ttk.Button(botones, text="Limpiar", command=clear)\
-    .grid(column=2, row=0, pady=(10, 20), padx=(15, 0))
+    # Add a combobox from which to select the user
+    ttk.Label(factores_principales, text="Operador:", font=("Gotham", 14))\
+        .grid(column=0, row=0, sticky=tk.E, pady=(5, 15), padx=(15, 0))
+    operador = tk.StringVar()
+    operador_cb = ttk.Combobox(factores_principales, textvariable=operador, state="readonly",\
+                                font=("Gotham", 12), width=25, justify=tk.CENTER)
+    operador_cb["values"] = [(f"{u[1]} - {u[2]}") for u in usuarios]
+    operador_cb.grid(column=1, row=0, columnspan=2, pady=(5, 15), padx=(15, 15))
 
-clear()
+
+    ################################################################################
+    # Add a frame for the entry fields
+    marco_formulario = ttk.Frame(ventana_principal, style="TFrame")
+    marco_formulario.grid(column=0, row=2, columnspan=4, pady=(10, 10), padx=(20))
+
+    # Add entry fields
+    fecha_entrada = tk.StringVar()
+    identificador = tk.StringVar()
+    importe = tk.DoubleVar()
+    campo = tk.StringVar()
+    num_llamadas = tk.StringVar()
+    fecha_resolucion = tk.StringVar()
+    operador_resolucion = tk.StringVar()
+    observaciones = tk.StringVar()
+
+    # Dynamically advance the row counter to structure the form
+    row_form = 0
+
+    ################################################################################
+    # Add a separator to define a section
+    ttk.Separator(marco_formulario,orient='horizontal')\
+        .grid(column=0, row=row_form, columnspan=8, sticky='ew', pady=5)
+    row_form += 1
+
+    # Add a date entry field
+    ttk.Label(marco_formulario, text="Fecha de\nentrada:")\
+        .grid(column=0, row=row_form, sticky=tk.E)
+    cal_entrada = DateEntry(marco_formulario, textvariable=fecha_entrada, font=("Gotham Light", 10),
+        justify=tk.CENTER, width=20, locale="es_ES", date_pattern="dd-MM-yyyy")
+    cal_entrada.grid(column=1, row=row_form)
+
+    # Add a field for the global identifier of the register, and a button to search for it on the database
+    ttk.Label(marco_formulario, text="ID:")\
+        .grid(column=2, row=row_form, sticky=tk.E)
+    marco_id = ttk.Frame(marco_formulario, style="TFrame")
+    marco_id.grid(column=3, row=row_form, columnspan=1, sticky=tk.W)
+
+    ttk.Entry(marco_id, textvariable=identificador, font=("Gotham Light", 10), width=19)\
+        .grid(column=0, row=0)
+    search_img = PhotoImage(file=r".\imgs\search.png")
+    ttk.Button(marco_id, image=search_img, command=buscar_id, width=5, padding=(0))\
+        .grid(column=1, row=0, sticky=tk.W)
+
+    # Add a number field which validates character entry
+    val = marco_formulario.register(verificar_numerico)
+    ttk.Label(marco_formulario, text="Importe:")\
+        .grid(column=4, row=row_form, sticky=tk.E)
+    ttk.Entry(marco_formulario, textvariable=importe, font=("Gotham Light", 10), width=22,
+            validate="key", validatecommand=(val, "%S"))\
+        .grid(column=5, row=row_form)
+
+    # Add a combobox from a given collection with a bound method that updates multiple widgets
+    ttk.Label(marco_formulario, text="Estado:")\
+        .grid(column=6, row=row_form, sticky=tk.E)
+    estados_cb = ttk.Combobox(marco_formulario, state="readonly",
+        font=("Gotham Light", 10), width=20)
+    estados_cb['values'] = ["--", "OK", "INCIDENCIA", "KO"]
+    estados_cb.current(0)
+    estados_cb.grid(column=7, row=row_form)
+    estados_cb.bind("<<ComboboxSelected>>", estado_seleccionado)
+
+    row_form += 1
+
+    ################################################################################
+    # Add a separator
+    ttk.Separator(marco_formulario,orient='horizontal')\
+        .grid(column=0, row=row_form, columnspan=8, sticky='ew', pady=5)
+    row_form += 1
+
+    # Section with explicitly defined variables for them to be disabled or enabled
+    campo_label = ttk.Label(marco_formulario, text="Campo:", state="disabled")
+    campo_label.grid(column=0, row=row_form, sticky=tk.E)
+    campo_entry = ttk.Entry(marco_formulario, textvariable=campo, font=("Gotham Light", 10),
+        width=22, state="disabled")
+    campo_entry.grid(column=1, row=row_form)
+
+    num_label = ttk.Label(marco_formulario, text="Nº llamadas:", state="disabled")
+    num_label.grid(column=2, row=row_form, sticky=tk.E)
+    num_llamadas.set(0)
+    num_entry = ttk.Entry(marco_formulario, textvariable=num_llamadas, font=("Gotham Light", 10),
+        width=22, state="disabled")
+    num_entry.grid(column=3, row=row_form)
+
+    fres_label = ttk.Label(marco_formulario, text="Fecha\nresolución:", state="disabled")
+    fres_label.grid(column=4, row=row_form, sticky=tk.E)
+    cal_resolucion = DateEntry(marco_formulario, textvariable=fecha_resolucion,
+        font=("Gotham Light", 10), state="disabled", 
+        justify=tk.CENTER, width=20, locale='es_ES', date_pattern="dd-MM-yyyy")
+    cal_resolucion.grid(column=5, row=row_form)
+
+    opres_label = ttk.Label(marco_formulario, text="Operador\nresolución:", state="disabled")
+    opres_label.grid(column=6, row=row_form, sticky=tk.E)
+    oper_res_cb = ttk.Combobox(marco_formulario, textvariable=operador_resolucion,
+        state="disabled", font=("Gotham Light", 10), width=20)
+    oper_res_cb['values'] = [u[1] for u in usuarios]
+    oper_res_cb.grid(column=7, row=row_form)
+
+    row_form += 1
+
+    ################################################################################
+    # Add a separator
+    ttk.Separator(marco_formulario,orient='horizontal')\
+        .grid(column=0, row=row_form, columnspan=8, sticky='ew', pady=5)
+    row_form += 1
+
+    # Add a text field form comments
+    ttk.Label(marco_formulario, text="Observaciones:")\
+        .grid(column=2, row=row_form, sticky=tk.E)
+    observaciones = tk.Text(marco_formulario, font=("Gotham Light", 10), width=50, 
+            height=3, background="#F0F0F0", relief="sunken", wrap=tk.WORD)
+    observaciones.grid(column=3, row=row_form, columnspan=4, sticky=tk.W+tk.E+tk.N+tk.S)
+
+    row_form += 1
+
+    ################################################################################
+    # Add a separator
+    ttk.Separator(marco_formulario,orient='horizontal')\
+        .grid(column=0, row=row_form, columnspan=8, sticky='ew', pady=5)
+    row_form += 1
+
+    # Resize the grid columns and rows
+    tk_utils.redimensionar_filas_columnas(marco_formulario)
 
 
-################################################################################
-# Center the window in the screen
-tk_utils.centrar_ventana(ventana_principal)
+    ################################################################################
+    # Add a button to submit the form and a button to clear the form
+    botones = ttk.Frame(ventana_principal, style="TFrame")
+    botones.grid(column=0, row=3, columnspan=4, pady=(10, 10), padx=(10, 10))
 
-# Start GUI
-ventana_principal.mainloop()
+    confirmar = ttk.Button(botones, text="Confirmar", command=submit)\
+        .grid(column=1, row=0, pady=(10, 20), padx=(0, 15))
+    limpiar = ttk.Button(botones, text="Limpiar", command=clear)\
+        .grid(column=2, row=0, pady=(10, 20), padx=(15, 0))
+
+    clear()
+
+
+    ################################################################################
+    # Center the window in the screen
+    tk_utils.centrar_ventana(ventana_principal)
+
+    # Start GUI
+    ventana_principal.mainloop()
+
+if __name__ == "__main__":
+    main()
