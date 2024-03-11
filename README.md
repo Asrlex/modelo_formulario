@@ -32,6 +32,7 @@ Documentación completa en [Python](./docs/main.html).
 
 <details>
   <summary>Detalles</summary>
+  
 #### Configuración
 
 El fichero de configuración `config.ini` contiene los parámetros de configuración del formulario, como la db a usar, cabeceras, o parámetros de estilo.
@@ -114,6 +115,161 @@ def verificar_datos(datos)
 def importar()
 def help()
 def about()
+```
+
+</details>
+
+### DB
+
+El fichero `db.py` contiene la clase `Database` que permite la conexión y gestión de la base de datos. Se utiliza SQLite3 para la gestión de la base de datos.
+Se definen métodos para la creación de la base de datos, la inserción de datos, la consulta de datos y la exportación de datos.
+Además de los métodos genéricos, se definen métodos específicos para la gestión de la base de datos de la aplicación.
+
+<details>
+  <summary>Detalles</summary>
+
+#### Inicialización DB
+
+Se inicializa la base de datos con el nombre del fichero de la base de datos.
+
+```python
+def __init__(self, db):
+        '''Constructor'''
+        self.conn = sqlite3.connect(db)
+        self.cur = self.conn.cursor()
+    
+    def __del__(self):
+        '''Destructor'''
+        self.conn.close()
+
+    def query(self, query):
+        '''Execute a query passed as a parameter'''
+        self.cur.execute(query)
+        self.conn.commit()
+```
+
+#### Métodos DB
+
+Se definen métodos para la gestión de registros genéricos, usuarios y logs.
+
+```python
+def create_table_usuarios(self):
+        '''Create a table called usuarios with the following fields: id, nombre, usuario'''
+        self.cur.execute("CREATE TABLE IF NOT EXISTS usuarios \
+                        (id INTEGER PRIMARY KEY, nombre TEXT, usuario TEXT)")
+        self.conn.commit()
+    
+    def create_table_registros(self):
+        '''Create a table called registros that stores every registered task
+            The table called registros has following fields:
+                id (integer, primary key),
+                fechaEntrada (datetime),
+                operador (text),
+                identificador (text),
+                importe (real),
+                estado (text),
+                x (text),
+                num_llamadas (integer),
+                fechaResolucion (datetime),
+                operadorResolucion (text),
+                observaciones (text)
+        '''
+        self.cur.execute("CREATE TABLE IF NOT EXISTS registros \
+                        (id INTEGER PRIMARY KEY, fechaEntrada DATETIME, operador TEXT, identificador TEXT, importe REAL,\
+                        estado TEXT, x TEXT, num_llamadas INTEGER, fechaResolucion DATETIME, operadorResolucion TEXT, \
+                        observaciones TEXT)")
+        self.conn.commit()
+
+    def create_table_logs(self):
+        '''Create a table called logs with the following fields: id, fecha, usuario, accion'''
+        self.cur.execute("CREATE TABLE IF NOT EXISTS logs \
+                        (id INTEGER PRIMARY KEY, fecha DATETIME, usuario TEXT, accion TEXT)")
+        self.conn.commit()
+```
+
+</details>
+
+### Excel
+
+El fichero `excel.py` contiene la clase `Excel` que permite la gestión de la exportación de datos a ficheros Excel. Usa la librería `openpyxl` para la gestión de ficheros Excel.
+
+<details>
+  <summary>Detalles</summary>
+
+#### Inicialización Excel
+
+Se inicializa la clase con los parámetros base vacíos.
+
+```python
+def __init__(self):
+    """ Constructor """
+    self.archivo = ''
+    self.libro = ''
+    self.hoja = ''
+    self.celdas = []
+    self.datos = []
+    self.columnas = []
+    self.filas = []
+```
+
+#### Métodos Excel
+
+Se definen métodos para la gestión de la exportación de datos a ficheros Excel, como crear un nuevo archivo, cargar uno existente, gestión de hojas, y formateo de celdas.
+
+```python
+def crear_archivo(self, nombre):
+    """ Crea un archivo excel """
+    self.libro = Workbook()
+    self.archivo = nombre
+    self.hoja = self.libro.active
+    self.hoja.title = 'Registros'
+    self.celdas = list(self.hoja)
+    self.datos = list(self.hoja.values)
+    self.columnas = list(self.hoja.columns)
+    self.filas = list(self.hoja.rows)
+
+def crear_hoja(self, nombre):
+    """ Crea una hoja en el archivo """
+    self.hoja = self.libro.create_sheet(nombre)
+    self.celdas = list(self.hoja)
+    self.datos = list(self.hoja.values)
+    self.columnas = list(self.hoja.columns)
+    self.filas = list(self.hoja.rows)
+
+def rellenar_hoja(self, registros):
+    """ Rellena la hoja con los registros """
+    for registro in registros:
+        self.hoja.append(registro)
+    self.actualizar_hoja()
+```
+
+Se definen métodos para los estilos de las cabeceras y las celdas normales.
+
+```python
+def formato_hoja(self):
+    """ Formatea la hoja """
+    for fila in self.filas[1:]:
+        for celda in fila:
+            celda.alignment = Alignment(horizontal='center', vertical='center')
+            celda.border = Border(
+                left = Side(style='thin'), 
+                right = Side(style='thin'), 
+                top = Side(style='thin'), 
+                bottom = Side(style='thin'))
+            celda.font = Font(name='Gotham Light', size=10)
+    for columna in self.columnas:
+        self.hoja.column_dimensions[columna[0].column_letter].width = 20
+
+def formato_cabecera(self):
+    """ Formatea la cabecera """
+    for celda in self.celdas[0]:
+        celda.alignment = Alignment(horizontal='center', vertical='center')
+        celda.border = Border(
+            left=Side(style='thick'), 
+            right=Side(style='thick'), 
+            top=Side(style='thick'), 
+            bottom=Side(style='thick'))
+        celda.font = Font(name='Gotham Bold', size=12)
 ```
 
 </details>
