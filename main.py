@@ -351,9 +351,7 @@ database = db.Database(DB_FILE)
 
 # All needed collections are defined here
 usuarios = database.get_all_usuarios()
-cabeceras = ["ID", "Fecha entrada", "Operador", "Identificador", 
-            "Importe", "Estado", "Campo", "Nº llamadas", "Fecha resolución", 
-            "Operador resolución", "Observaciones"]
+cabeceras = config["DATA"]["DATA_HEADERS"].split()
 
 
 ################################################################################
